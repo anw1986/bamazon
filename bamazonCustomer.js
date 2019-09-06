@@ -5,6 +5,7 @@ const {
 } = require('table');
 var inquirer = require("inquirer")
 var figlet = require('figlet');
+const chalk = require('chalk');
 process.stdout.write('\033c');
 
 figlet('Bamazon!!', function (err, data) {
@@ -27,9 +28,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err
     console.log("connected to Bamazon database")
-    // viewAllItems(function () {
-    //     customerPrompt()
-    // })
+    
     viewAllItems()
 })
 
@@ -45,7 +44,7 @@ function viewAllItems() {
         var data, output;
 
         data = [
-            ['Product ID', 'Product Name', 'Unit Price', 'Qty in Stock']
+            [chalk.greenBright.bold('Product ID'), chalk.greenBright.bold('Product Name'), chalk.greenBright.bold('Unit Price'), chalk.greenBright.bold('Qty in Stock')]
 
         ];
 
@@ -82,9 +81,9 @@ function customerPrompt() {
             {
                 name: "qty",
                 message: "How many units of the product you would like to buy?",
-                type: "input",
+                type: "number",
                 validate: function (value) {
-                    if (isNaN(value) || !(Number.isInteger(value))) {
+                    if (isNaN(value) || !(Number.isInteger(value))||value<0) {
                         return "Please enter valid quantity"
                     } else return true
                 } 
@@ -110,6 +109,7 @@ function customerPrompt() {
                         default: true
                     }]).then(function (answer) {
                         if (answer.continue) {
+                            process.stdout.write('\033c');
                             viewAllItems()
                         } else {
                             console.log("Hope to see you next time")

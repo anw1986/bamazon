@@ -41,6 +41,7 @@ function queryPromise(str, params) {
     })
 }
 
+// My test function for testing code
 function test() {
     var list = []
 
@@ -97,6 +98,22 @@ function userchoice() {
     })
 }
 
+function mainMenu() {
+    inquirer.prompt([{
+        name: "return",
+        message: "Return to main menu?",
+        type: "confirm",
+        default: true
+    }]).then(function (response) {
+        if (response.return) {
+            process.stdout.write('\033c');
+            userchoice()
+        } else {
+            connection.end()
+        }
+    })
+}
+
 function viewAll() {
     console.log("Viewing all items in database")
     var sql = "SELECT * FROM bamazon_db.products"
@@ -118,6 +135,7 @@ function viewAll() {
 
         output = table(data);
         console.log(output);
+        mainMenu()
     })
 }
 
@@ -142,6 +160,7 @@ function viewLow() {
 
         output = table(data);
         console.log(output);
+        mainMenu()
     })
 }
 
@@ -180,11 +199,16 @@ function addnewItem() {
                 type: "list",
                 choices: list.filter(onlyUnique)
 
-            }, 
+            },
             {
                 name: "unitPrice",
                 message: "Please enter unit price",
-                type: "input"
+                type: "number",
+                validate: function (value) {
+                    if (isNaN(value) || value < 0) {
+                        return "Please enter valid quantity"
+                    } else return true
+                }
             },
             {
                 name: "unitQty",
@@ -197,7 +221,17 @@ function addnewItem() {
                 }
             }
         ]).then(function (response) {
-            console.log(response)
+            var sql = "INSERT INTO bamazon_db.products SET ?";
+            connection.query(sql, {
+                product_name: response.productName,
+                department_name: response.deptname,
+                price: response.unitPrice,
+                stock_quantity: response.unitQty
+            }, function (err) {
+                if (err) throw err
+                console.log("Your item has been added successfully!")
+                mainMenu()
+            })
         })
     })
 
@@ -206,4 +240,3 @@ function addnewItem() {
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
 }
-
