@@ -1,0 +1,26 @@
+{
+  "name": "bamazon",
+  "version": "1.0.0",
+  "description": "json for bamazom node app",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/anw1986/bamazon.git"
+  },
+  "author": "Ahmed Waheed",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/anw1986/bamazon/issues"
+  },
+  "homepage": "https://github.com/anw1986/bamazon#readme",
+  "dependencies": {
+    "dotenv": "^8.1.0",
+    "figlet": "^1.2.4",
+    "inquirer": "^7.0.0",
+    "mysql": "^2.17.1",
+    "table": "^5.4.6"
+  }
+}
