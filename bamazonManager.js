@@ -22,7 +22,7 @@ var connection = mysql.createConnection({
     port: process.env.db_port,
     user: process.env.db_user,
     password: process.env.db_password,
-    database: process.env.bamazon_db
+    database: process.env.db_name
 });
 
 connection.connect(function (err) {
@@ -76,7 +76,8 @@ function userchoice() {
             "View Products for Sale",
             "View Low Inventory",
             "Add to Inventory",
-            "Add New Product"
+            "Add New Product",
+            "Exit"
         ]
     }]).then(function (response) {
         var userInput = response.menuList;
@@ -94,7 +95,7 @@ function userchoice() {
                 addnewItem()
                 break;
             default:
-                console.log("Nothing selected")
+                connection.end()
         }
     })
 }
@@ -118,7 +119,7 @@ function mainMenu() {
 
 function viewAll() {
     console.log("Viewing all items in database")
-    var sql = "SELECT * FROM bamazon_db.products"
+    var sql = "SELECT * FROM test_bamazon_db.products"
 
     connection.query(sql, function (err, result) {
         if (err) throw err;
@@ -143,7 +144,7 @@ function viewAll() {
 
 function viewLow() {
     console.log("Items with quantity less than 5")
-    var sql = "SELECT * FROM bamazon_db.products WHERE stock_quantity<=5"
+    var sql = "SELECT * FROM test_bamazon_db.products WHERE stock_quantity<=5"
 
     connection.query(sql, function (err, result) {
         if (err) throw err;
@@ -168,7 +169,7 @@ function viewLow() {
 
 function addqty() {
 
-    var sql = "SELECT * FROM bamazon_db.products"
+    var sql = "SELECT * FROM test_bamazon_db.products"
     connection.query(sql, function (err, result) {
 
         if (err) throw err
@@ -199,17 +200,17 @@ function addqty() {
         ]).then(function (response) {
             var userChoice = response.productName
             var userQty = response.qty
-            connection.query("SELECT * FROM bamazon_db.products WHERE product_name=?", [userChoice], function (err, resultchoice) {
+            connection.query("SELECT * FROM test_bamazon_db.products WHERE product_name=?", [userChoice], function (err, resultchoice) {
                 if (err) throw err
                 var qtyDB = resultchoice[0].stock_quantity
                 console.log(chalk.redBright.bold("Current qty in stock: " + qtyDB))
                 var qtyUpdate = qtyDB + userQty
                 if (qtyUpdate < 0) {
-                    console.log("The total amount is less then zero. Record not updated")
+                    console.log("The total amount is below zero. Record not updated")
                     addqty()
                 } else {
 
-                    connection.query("UPDATE bamazon_db.products SET stock_quantity=? WHERE product_name=?", [qtyUpdate, userChoice], function (err, resuultdb) {
+                    connection.query("UPDATE test_bamazon_db.products SET stock_quantity=? WHERE product_name=?", [qtyUpdate, userChoice], function (err, resuultdb) {
                         if (err) throw err;
 
                         console.log(resuultdb.affectedRows + " record(s) updated")
@@ -231,7 +232,7 @@ function addnewItem() {
 
     var list = []
 
-    var sql = "SELECT * FROM bamazon_db.products"
+    var sql = "SELECT * FROM test_bamazon_db.departments"
 
     queryPromise(sql).then(function (result) {
 
@@ -278,10 +279,16 @@ function addnewItem() {
                 }
             }
         ]).then(function (response) {
-            var sql = "INSERT INTO bamazon_db.products SET ?";
+
+            for (var j = 0; j < result.length; j++) {
+                if (result[j].department_name === response.deptname) {
+                    var deptId = result[j].department_id
+                }
+            }
+            var sql = "INSERT INTO test_bamazon_db.products SET ?";
             connection.query(sql, {
                 product_name: response.productName,
-                department_name: response.deptname,
+                department_id: deptId,
                 price: response.unitPrice,
                 stock_quantity: response.unitQty
             }, function (err) {

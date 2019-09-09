@@ -28,14 +28,14 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
     if (err) throw err
     console.log("connected to Bamazon database")
-    
+
     viewAllItems()
 })
 
 
 function viewAllItems() {
 
-    var sql = "SELECT * FROM bamazon_db.products"
+    var sql = "SELECT * FROM test_bamazon_db.products"
 
 
     connection.query(sql, function (err, result) {
@@ -62,7 +62,9 @@ function viewAllItems() {
 
 function customerPrompt() {
 
-    connection.query("SELECT * FROM bamazon_db.products", function (err, resultdb) {
+
+
+    connection.query("SELECT * FROM test_bamazon_db.products", function (err, resultdb) {
         if (err) throw err;
 
 
@@ -83,23 +85,27 @@ function customerPrompt() {
                 message: "How many units of the product you would like to buy?",
                 type: "number",
                 validate: function (value) {
-                    if (isNaN(value) || !(Number.isInteger(value))||value<0) {
+                    if (isNaN(value) || !(Number.isInteger(value)) || value < 0) {
                         return "Please enter valid quantity"
                     } else return true
-                } 
+                }
             }
 
         ]).then(function (responseID) {
             var itemID = responseID.productID
             var quantity = responseID.qty
 
-            connection.query("SELECT * FROM bamazon_db.products WHERE item_id=?", [itemID], function (err, result) {
+            connection.query("SELECT * FROM test_bamazon_db.products WHERE products.item_id=?", [itemID], function (err, result) {
+                if (err) throw err
                 var stockQuantity = result[0].stock_quantity
                 var UnitPrice = result[0].price;
+                var productSold = result[0].product_sales;
+                var updateSales = quantity + productSold
                 var total = UnitPrice * quantity;
                 var updateQuantity = stockQuantity - quantity
                 var data,
                     output;
+                // Check if order can be fullfilled
                 if (stockQuantity <= 0 || stockQuantity < quantity) {
                     console.log("Sorry, insufficient quantity in store. Your order cannot be fulfilled")
                     inquirer.prompt([{
@@ -127,7 +133,9 @@ function customerPrompt() {
                     data.push([result[0].item_id, result[0].product_name, result[0].price, quantity, total])
                     output = table(data);
                     console.log(output);
-                    connection.query("UPDATE bamazon_db.products SET stock_quantity=? WHERE item_id=?", [updateQuantity, itemID], function (err, x) {
+
+
+                    connection.query("UPDATE test_bamazon_db.products SET stock_quantity=?, product_sales=? WHERE item_id=?", [updateQuantity, updateSales, itemID], function (err, x) {
                         if (err) throw err;
                         console.log(x.affectedRows + " record(s) updated");
 
