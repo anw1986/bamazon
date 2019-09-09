@@ -5,6 +5,7 @@ const {
 } = require('table');
 var inquirer = require("inquirer")
 var figlet = require('figlet');
+const chalk = require('chalk');
 process.stdout.write('\033c');
 
 figlet('Bamazon!!\n\n Manager View', function (err, data) {
@@ -41,7 +42,7 @@ function queryPromise(str, params) {
     })
 }
 
-// My test function for testing code
+// My test function to test code
 function test() {
     var list = []
 
@@ -99,6 +100,7 @@ function userchoice() {
 }
 
 function mainMenu() {
+
     inquirer.prompt([{
         name: "return",
         message: "Return to main menu?",
@@ -165,7 +167,62 @@ function viewLow() {
 }
 
 function addqty() {
-    console.log("Add qty to the items")
+
+    var sql = "SELECT * FROM bamazon_db.products"
+    connection.query(sql, function (err, result) {
+
+        if (err) throw err
+
+        inquirer.prompt([{
+                name: "productName",
+                type: "rawlist",
+                message: "Please choose which item would you like to add inventory",
+                choices: function () {
+                    var choiceArray = []
+                    for (var i = 0; i < result.length; i++) {
+                        choiceArray.push(result[i].product_name)
+                    }
+                    return choiceArray;
+                }
+
+            },
+            {
+                name: "qty",
+                type: "number",
+                message: "Enter quantity",
+                validate: function (value) {
+                    if (isNaN(value) || !(Number.isInteger(value))) {
+                        return "Please enter valid quantity"
+                    } else return true
+                }
+            }
+        ]).then(function (response) {
+            var userChoice = response.productName
+            var userQty = response.qty
+            connection.query("SELECT * FROM bamazon_db.products WHERE product_name=?", [userChoice], function (err, resultchoice) {
+                if (err) throw err
+                var qtyDB = resultchoice[0].stock_quantity
+                console.log(chalk.redBright.bold("Current qty in stock: " + qtyDB))
+                var qtyUpdate = qtyDB + userQty
+                if (qtyUpdate < 0) {
+                    console.log("The total amount is less then zero. Record not updated")
+                    addqty()
+                } else {
+
+                    connection.query("UPDATE bamazon_db.products SET stock_quantity=? WHERE product_name=?", [qtyUpdate, userChoice], function (err, resuultdb) {
+                        if (err) throw err;
+
+                        console.log(resuultdb.affectedRows + " record(s) updated")
+                        console.log(chalk.greenBright.bold("New qty in stock: " + qtyUpdate))
+                        mainMenu()
+                    })
+
+                }
+
+            })
+        })
+    })
+
 }
 
 function addnewItem() {
