@@ -5,6 +5,7 @@ A node app for shoping. The application is created in CLI and different prompts 
 ![challenge_1](./video_demo/challenge_1.gif)
 
 ## Challenge #2: Manager View 
+![challenge_2s](./video_demo/challenge_2.gif)
 
 ## Challenge #3: Supervisor View 
 

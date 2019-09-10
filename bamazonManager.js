@@ -75,6 +75,7 @@ function userchoice() {
         choices: [
             "View Products for Sale",
             "View Low Inventory",
+            "View Historical Sales",
             "Add to Inventory",
             "Add New Product",
             "Exit"
@@ -93,6 +94,10 @@ function userchoice() {
                 break;
             case "Add New Product":
                 addnewItem()
+                break;
+
+            case "View Historical Sales":
+                pastSales()
                 break;
             default:
                 connection.end()
@@ -133,15 +138,7 @@ function viewAll() {
 
         ];
 
-        
-        // config = {
-        //     columns: {
-        //         0: {
-        //             width: 20,
-        //             wrapWord: true
-        //         }
-        //     }
-        // };
+
 
         for (i = 0; i < result.length; i++) {
             data.push([result[i].item_id, result[i].department_name, result[i].product_name, result[i].price, result[i].stock_quantity])
@@ -314,4 +311,30 @@ function addnewItem() {
 
 function onlyUnique(value, index, self) {
     return self.indexOf(value) === index;
+}
+
+function pastSales(){
+    var sql="SELECT products.item_id, department_name, products.product_name, products.price,products.stock_quantity,products.product_sales FROM test_bamazon_db.products JOIN departments ON products.department_id=departments.department_id ORDER BY department_name ASC, product_sales DESC";
+   
+    connection.query(sql, function (err, result) {
+        if (err) throw err;
+
+        var data,
+            output,
+            config;
+
+        data = [
+            ['Product ID', 'Department', 'Product Name', 'Unit Price', "Past Sales"]
+
+        ];
+
+
+        for (i = 0; i < result.length; i++) {
+            data.push([result[i].item_id, result[i].department_name, result[i].product_name, result[i].price,result[i].product_sales])
+        }
+
+        output = table(data);
+        console.log(output);
+        mainMenu()
+    })
 }
