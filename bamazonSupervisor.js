@@ -81,7 +81,7 @@ function createNew() {
             }
         }
     ]).then(function (response) {
-        var sql = "INSERT INTO bamazon_db.departments SET ?";
+        var sql = "INSERT INTO test_bamazon_db.departments SET ?";
         connection.query(sql, {
             department_name: response.deptname,
             over_head_costs: response.overHead
