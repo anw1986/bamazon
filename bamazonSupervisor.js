@@ -88,12 +88,13 @@ function createNew() {
         }, function (err) {
             if (err) throw err
             console.log("Department has been added!!!")
+            mainMenu()
         })
     })
 }
 
 function salesDept() {
-    var sql = "SELECT departments.department_name,departments.over_head_costs,SUM( products.product_sales*products.price) AS product_sales, SUM( products.product_sales*products.price)-departments.over_head_costs AS total_profit FROM departments JOIN products ON products.department_id = departments.department_id GROUP BY department_name ORDER BY total_profit DESC"
+    var sql = "SELECT departments.department_name,departments.over_head_costs,round(SUM( products.product_sales*products.price),2) AS product_sales, round(SUM( products.product_sales*products.price)-departments.over_head_costs,2) AS total_profit FROM departments JOIN products ON products.department_id = departments.department_id GROUP BY department_name ORDER BY total_profit DESC"
     connection.query(sql, function (err, resultdb) {
         if (err) throw err
         var data,
@@ -105,10 +106,34 @@ function salesDept() {
         ];
 
         for (var i = 0; i < resultdb.length; i++) {
-            data.push([resultdb[i].department_name, resultdb[i].over_head_costs, resultdb[i].product_sales, resultdb[i].total_profit])
+            if (resultdb[i].total_profit<0){
+                data.push([resultdb[i].department_name, resultdb[i].over_head_costs, resultdb[i].product_sales, chalk.redBright.bold(resultdb[i].total_profit)]) 
+            }else{
+                data.push([resultdb[i].department_name, resultdb[i].over_head_costs, resultdb[i].product_sales, chalk.greenBright.bold(resultdb[i].total_profit)]) 
+            } 
+
+            
         }
 
         output = table(data);
         console.log(output);
+        mainMenu()
+    })
+}
+
+function mainMenu() {
+
+    inquirer.prompt([{
+        name: "return",
+        message: "Return to main menu?",
+        type: "confirm",
+        default: true
+    }]).then(function (response) {
+        if (response.return) {
+            process.stdout.write('\033c');
+            userchoice()
+        } else {
+            connection.end()
+        }
     })
 }

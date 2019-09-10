@@ -119,7 +119,7 @@ function mainMenu() {
 
 function viewAll() {
     console.log("Viewing all items in database")
-    var sql = "SELECT * FROM test_bamazon_db.products"
+    var sql = "SELECT products.item_id, department_name, products.product_name, products.price,products.stock_quantity,products.product_sales FROM test_bamazon_db.products JOIN departments ON products.department_id=departments.department_id ORDER BY department_name ASC, product_name ASC "
 
     connection.query(sql, function (err, result) {
         if (err) throw err;
@@ -128,12 +128,12 @@ function viewAll() {
             output;
 
         data = [
-            ['Product ID', 'Product Name', 'Unit Price', 'Qty in Stock']
+            ['Product ID','Department', 'Product Name', 'Unit Price', 'Qty in Stock']
 
         ];
 
         for (i = 0; i < result.length; i++) {
-            data.push([result[i].item_id, result[i].product_name, result[i].price, result[i].stock_quantity])
+            data.push([result[i].item_id, result[i].department_name, result[i].product_name, result[i].price, result[i].stock_quantity])
         }
 
         output = table(data);
