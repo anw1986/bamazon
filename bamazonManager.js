@@ -125,12 +125,23 @@ function viewAll() {
         if (err) throw err;
 
         var data,
-            output;
+            output,
+            config;
 
         data = [
-            ['Product ID','Department', 'Product Name', 'Unit Price', 'Qty in Stock']
+            ['Product ID', 'Department', 'Product Name', 'Unit Price', 'Qty in Stock']
 
         ];
+
+        
+        // config = {
+        //     columns: {
+        //         0: {
+        //             width: 20,
+        //             wrapWord: true
+        //         }
+        //     }
+        // };
 
         for (i = 0; i < result.length; i++) {
             data.push([result[i].item_id, result[i].department_name, result[i].product_name, result[i].price, result[i].stock_quantity])
